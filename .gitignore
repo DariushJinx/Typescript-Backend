@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+**/**/node_modules
+**/**/**/node_modules
+src/public
+public
+src/public/uploads
+public/uploads
+uploads
+file.txt
