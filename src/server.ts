@@ -8,9 +8,10 @@ import swaggerUI from "swagger-ui-express";
 import morgan from "morgan";
 import "./utils/mongoDBConnection";
 import * as dotenv from "dotenv";
-dotenv.config({ path: __dirname+'/.env' });
+dotenv.config({ path: __dirname + "/.env" });
 import { ApiErrorHandler, NotfoundErrorHandler } from "./utils/ApiErrorHandler";
 import { AuthController } from "./http/controllers/auth/auth.controller";
+import { CategoryController } from "./http/controllers/category/category.controller";
 export class setupServer extends Server {
   private server?: http.Server;
   constructor(private port: number = 8888) {
@@ -26,7 +27,7 @@ export class setupServer extends Server {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cors({ origin: "*" }));
     this.app.use(morgan("dev"));
-    this.app.use(express.static(path.join(__dirname, ".", "public")));
+    this.app.use(express.static(path.join(__dirname,"..","public")));
     this.app.use(
       "/api-doc",
       swaggerUI.serve,
@@ -66,10 +67,8 @@ export class setupServer extends Server {
     this.app.use(ApiErrorHandler);
   }
   private setupControllers() {
-    const controllers = [
-      new AuthController()
-  ]
-  super.addControllers(controllers)
+    const controllers = [new AuthController(), new CategoryController()];
+    super.addControllers(controllers);
   }
   public start(): void {
     this.server = http.createServer(this.app);
