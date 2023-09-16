@@ -1,3 +1,5 @@
+import { Document } from "mongoose";
+
 export interface IUser extends Document {
   first_name: string;
   last_name: string;
@@ -10,5 +12,5 @@ export interface IUser extends Document {
   birthday: string;
   role: string;
   basket: object;
-  token: string;
+  accessToken: string;
 }
