@@ -69,12 +69,12 @@
  *          Login :
  *              type : object
  *              required :
- *                  -   identifier
+ *                  -   username
  *                  -   password
  *              properties :
- *                  identifier :
+ *                  username :
  *                      type : string
- *                      description : the user identifier for login(email/username)
+ *                      description : the user username for login(email/username)
  *                  password :
  *                      type : string
  *                      description : the user password for login
