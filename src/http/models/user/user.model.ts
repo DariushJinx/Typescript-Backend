@@ -33,7 +33,7 @@ const UserSchema = new mongoose.Schema<IUser>(
     birthday: { type: String },
     role: { type: String, default: "USER" },
     basket: { type: BasketSchema },
-    token: { type: String, default: "" },
+    accessToken: { type: String, default: "" },
   },
   {
     timestamps: true,
