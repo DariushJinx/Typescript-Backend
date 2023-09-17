@@ -18,10 +18,10 @@ export class basketController {
   async addProductInBasket(req: Request, res: Response, next: NextFunction) {
     try {
       const { productID } = req.params;
-      const user = req.user;
+      const user: IUser | undefined = req.user;
       await this.basketService.checkExistProduct(productID);
-      const product = await this.basketService.findProductInBasket(user?._id, productID);
-      let message;
+      const product: IUser = await this.basketService.findProductInBasket(user?._id, productID);
+      let message: string;
       if (product) {
         await UserModel.updateOne(
           {
@@ -65,10 +65,13 @@ export class basketController {
   async removeProductFromBasket(req: Request, res: Response, next: NextFunction) {
     try {
       const { productID } = req.params;
-      const user = req.user;
+      const user: IUser | undefined = req.user;
       await this.basketService.checkExistProduct(productID);
-      const product = await this.basketService.findProductInBasket(user?._id, productID);
-      let message;
+      const product: IUser | null = await this.basketService.findProductInBasket(
+        user?._id,
+        productID
+      );
+      let message: string;
       if (product.count > "1") {
         await UserModel.updateOne(
           {
@@ -110,7 +113,7 @@ export class basketController {
   @Middleware(AuthMiddleware)
   async removeAllProductFromBasket(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = req.user;
+      const user: IUser | undefined = req.user;
 
       await UserModel.updateOne(
         { _id: user?._id },
@@ -137,9 +140,9 @@ export class basketController {
   async addCourseInBasket(req: Request, res: Response, next: NextFunction) {
     try {
       const { courseID } = req.params;
-      const user = req.user;
+      const user: IUser | undefined = req.user;
       await this.basketService.checkExistCourse(courseID);
-      const course = await this.basketService.findCourseInBasket(user?._id, courseID);
+      const course: IUser | null = await this.basketService.findCourseInBasket(user?._id, courseID);
       if (course) {
         return res.status(StatusCodes.BAD_REQUEST).json({
           statusCode: StatusCodes.BAD_REQUEST,
@@ -176,9 +179,9 @@ export class basketController {
   async removeCourseFromBasket(req: Request, res: Response, next: NextFunction) {
     try {
       const { courseID } = req.params;
-      const user = req.user;
+      const user: IUser | undefined = req.user;
       await this.basketService.checkExistCourse(courseID);
-      const course = await this.basketService.findCourseInBasket(user?._id, courseID);
+      const course: IUser | null = await this.basketService.findCourseInBasket(user?._id, courseID);
       if (!course) {
         return res.status(StatusCodes.NOT_FOUND).json({
           statusCode: StatusCodes.NOT_FOUND,
