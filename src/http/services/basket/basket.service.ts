@@ -13,7 +13,7 @@ export class BasketService {
       { _id: userID, "basket.products.productID": productID },
       { "basket.products.$": 1 }
     );
-    let userDetail;
+    let userDetail: any;
     if (findResult) {
       userDetail = FunctionUtils.copyObject(findResult);
     }
@@ -26,7 +26,7 @@ export class BasketService {
       { _id: userID, "basket.courses.courseID": courseID },
       { "basket.courses.$": 1 }
     );
-    let userDetail;
+    let userDetail: any;
     if (findResult) {
       userDetail = FunctionUtils.copyObject(findResult);
     }
@@ -34,13 +34,13 @@ export class BasketService {
   }
 
   async checkExistProduct(id: string): Promise<IProduct> {
-    const product = await ProductModel.findById(id);
+    const product: IProduct | null = await ProductModel.findById(id);
     if (!product) throw createHttpError.NotFound("محصول مورد نظر یافت نشد");
     return product;
   }
 
   async checkExistCourse(id: string): Promise<ICourse> {
-    const course = await CourseModel.findById(id);
+    const course: ICourse | null = await CourseModel.findById(id);
     if (!course) throw createHttpError.NotFound("دوره مورد نظر یافت نشد");
     return course;
   }
