@@ -14,6 +14,10 @@ import { AuthController } from "./http/controllers/auth/auth.controller";
 import { CategoryController } from "./http/controllers/category/category.controller";
 import { CourseController } from "./http/controllers/course/course.controller";
 import { ChapterController } from "./http/controllers/chapter/chapter.controller";
+import { EpisodeController } from "./http/controllers/episode/episode.controller";
+import { ProductController } from "./http/controllers/product/product.controller";
+import { basketController } from "./http/controllers/basket/basket.controller";
+import { BlogController } from "./http/controllers/blog/blog.controller";
 export class setupServer extends Server {
   private server?: http.Server;
   constructor(private port: number = 8888) {
@@ -74,6 +78,10 @@ export class setupServer extends Server {
       new CategoryController(),
       new CourseController(),
       new ChapterController(),
+      new EpisodeController(),
+      new ProductController(),
+      new basketController(),
+      new BlogController(),
     ];
     super.addControllers(controllers);
   }
