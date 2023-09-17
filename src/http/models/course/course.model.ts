@@ -19,10 +19,6 @@ const Episodes = new mongoose.Schema<IEpisode>(
   }
 );
 
-Episodes.virtual("videoURL").get(function (this: { videoAddress: string }) {
-  return `${process.env.BASE_URL}:${process.env.APPLICATION_PORT}/${this.videoAddress}`;
-});
-
 const Chapter = new mongoose.Schema<IChapter>(
   {
     title: { type: String, required: true },
