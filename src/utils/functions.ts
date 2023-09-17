@@ -69,7 +69,7 @@ export class FunctionUtils {
     });
   }
 
-  public static async findCourseWithTitleOrID (field:string,res:Response) {
+  public static async findCourseWithTitleOrID(field: string, res: Response) {
     const findQuery = mongoose.isValidObjectId(field) ? { _id: field } : { title: field };
     const course = await CourseModel.findOne(findQuery);
     if (!course) {
@@ -81,5 +81,26 @@ export class FunctionUtils {
       });
     }
     return course;
-  };
+  }
+
+  public static getTime(seconds: number) {
+    let total: any = Math.round(seconds) / 60;
+    let [minutes, percent] = String(total).split(".");
+    let second: any = Math.round((+percent * 60) / 100)
+      .toString()
+      .substring(0, 2);
+    let hour: any = 0;
+    if (+minutes > 60) {
+      total = +minutes / 60;
+      let [h1, percent] = String(total).split(".");
+      (hour = h1),
+        (minutes = Math.round((+percent * 60) / 100)
+          .toString()
+          .substring(0, 2));
+    }
+    if (String(hour) == "1") hour = `0${hour}`;
+    if (String(minutes) == "1") minutes = `0${minutes}`;
+    if (String(second) == "1") second = `0${second}`;
+    return `${hour} : ${minutes} : ${second}`;
+  }
 }
