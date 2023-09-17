@@ -18,6 +18,8 @@ import { EpisodeController } from "./http/controllers/episode/episode.controller
 import { ProductController } from "./http/controllers/product/product.controller";
 import { basketController } from "./http/controllers/basket/basket.controller";
 import { BlogController } from "./http/controllers/blog/blog.controller";
+import { CommentController } from "./http/controllers/comment/comment.controller";
+import { ContactController } from "./http/controllers/contact/contact.controller";
 export class setupServer extends Server {
   private server?: http.Server;
   constructor(private port: number = 8888) {
@@ -82,6 +84,8 @@ export class setupServer extends Server {
       new ProductController(),
       new basketController(),
       new BlogController(),
+      new CommentController(),
+      new ContactController(),
     ];
     super.addControllers(controllers);
   }
