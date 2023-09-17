@@ -18,16 +18,3 @@ export class CreateCategoryDto {
   @Allow()
   fileUploadPath: string;
 }
-
-export class UpdateBlogDto {
-  @IsDefined()
-  @Expose()
-  @Length(3, 30, { message: "عنوان دسته بندی وارد شده صحیح نمی باشد" })
-  title: string;
-  @IsDefined()
-  @Expose()
-  @Matches(/(\.png|\.jpg|\.webp|\.jpeg|\.gif)$/, { message: "فرمت عکس ارسالی صحیح نمی باشد" })
-  filename: string;
-  @Allow()
-  fileUploadPath: string;
-}
