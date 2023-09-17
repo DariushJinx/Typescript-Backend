@@ -3,7 +3,7 @@ import { CourseModel } from "../../models/course/course.model";
 import { ICourse } from "../../types/course/course.types";
 
 export class CourseService {
-  async getOne(title: string): Promise<ICourse> {
+  async getOne(title: string): Promise<ICourse | null> {
     const course: ICourse | null = await CourseModel.findOne({ title: title })
       .populate([
         { path: "category", select: { title: 1 } },
@@ -41,10 +41,6 @@ export class CourseService {
         },
       ])
       .lean();
-    if (course) {
-      return course;
-    } else {
-      throw createHttpError.NotFound("دوره مورد نظر یافت نشد");
-    }
+    return course;
   }
 }
