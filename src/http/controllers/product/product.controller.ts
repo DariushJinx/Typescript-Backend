@@ -329,7 +329,7 @@ export class ProductController {
       const { feature_title, feature_description } = req.body;
       const product = await this.productService.findProductWithIDOrTitle(field);
       const updateResult = await ProductModel.updateOne(
-        { _id: product._id },
+        { _id: product?._id },
         {
           $push: {
             "features.feature_detail": { feature_title, feature_description },
@@ -408,7 +408,7 @@ export class ProductController {
     try {
       const { field } = req.params;
       const product = await this.productService.findProductWithIDOrTitle(field);
-      const removeResult = await ProductModel.deleteOne({ _id: product._id });
+      const removeResult = await ProductModel.deleteOne({ _id: product?._id });
       if (!removeResult.deletedCount) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -433,7 +433,7 @@ export class ProductController {
     try {
       const { field } = req.params;
       const product = await this.productService.findProductWithIDOrTitle(field);
-      const comments = await CommentModel.find({ productName: product._id, show: 1 })
+      const comments = await CommentModel.find({ productName: product?._id, show: 1 })
         .populate([
           { path: "commentUser", select: { first_name: 1, last_name: 1, mobile: 1, email: 1 } },
         ])
@@ -443,7 +443,7 @@ export class ProductController {
 
       let productScores = comments.filter((comment) => {
         if (comment.productName) {
-          if (comment.productName.toString() === product._id.toString()) {
+          if (comment.productName.toString() === product?._id.toString()) {
             return comment;
           }
         }
@@ -482,30 +482,32 @@ export class ProductController {
   async updateProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const { field } = req.params;
-      const product = await this.productService.findProductWithIDOrTitle(field);
-      const files = req.files as { [filename: string]: Express.Multer.File[] };
-      const ProductBlackList = ["bookmarks", "likes", "dislikes", "comments", "supplier", "colors"];
-      const data = FunctionUtils.copyObject(req.body);
-      FunctionUtils.deleteInvalidPropertyInObject(data, ProductBlackList);
-      if (Array.isArray(files)) {
-        if (req?.body?.fileUploadPath && files) {
-          FunctionUtils.ListOfImagesForRequest(files || [], req.body.fileUploadPath);
-        }
-        const updateResult = await ProductModel.updateOne({ _id: product._id }, { $set: data });
-        if (!updateResult.modifiedCount) {
-          return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      if(field){        
+        const product = await this.productService.findProductWithIDOrTitle(field);
+        const files = req.files as { [filename: string]: Express.Multer.File[] };
+        const ProductBlackList = ["bookmarks", "likes", "dislikes", "comments", "supplier", "colors"];
+        const data = FunctionUtils.copyObject(req.body);
+        FunctionUtils.deleteInvalidPropertyInObject(data, ProductBlackList);
+        if (Array.isArray(files)) {
+          if (req?.body?.fileUploadPath && files) {
+            FunctionUtils.ListOfImagesForRequest(files || [], req.body.fileUploadPath);
+          }
+          const updateResult = await ProductModel.updateOne({ _id: product?._id }, { $set: data });
+          if (!updateResult.modifiedCount) {
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+              statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+              data: {
+                message: "محصول مورد نظر با موفقیت به روزرسانی نشد",
+              },
+            });
+          }
+          return res.status(StatusCodes.OK).json({
+            statusCode: StatusCodes.OK,
             data: {
-              message: "محصول مورد نظر با موفقیت به روزرسانی نشد",
+              message: "محصول مورد نظر با موفقیت به روزرسانی شد",
             },
           });
         }
-        return res.status(StatusCodes.OK).json({
-          statusCode: StatusCodes.OK,
-          data: {
-            message: "محصول مورد نظر با موفقیت به روزرسانی شد",
-          },
-        });
       }
     } catch (err) {
       FunctionUtils.deleteFileInPublic(req.body.images);
