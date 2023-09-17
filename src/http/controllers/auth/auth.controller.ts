@@ -9,6 +9,7 @@ import { IUser } from "../../types/user/user.types";
 import { errorHandler } from "../../../utils/ApiErrorHandler";
 import { AuthService } from "../../services/auth/auth.service";
 import { BanModel } from "../../models/ban/ban.model";
+import { IBanUser } from "../../types/ban/ban.types";
 @Controller("auth")
 export class AuthController {
   private authService: AuthService = new AuthService();
@@ -19,7 +20,7 @@ export class AuthController {
         excludeExtraneousValues: true,
       });
       errorHandler(getOtpDto);
-      const isUserBan = await BanModel.find({ mobile: getOtpDto.mobile });
+      const isUserBan: IBanUser[] | null = await BanModel.find({ mobile: getOtpDto.mobile });
       if (isUserBan.length) {
         return res.status(StatusCodes.FORBIDDEN).json({
           statusCode: StatusCodes.FORBIDDEN,
@@ -28,8 +29,8 @@ export class AuthController {
           },
         });
       }
-      const code = FunctionUtils.RandomNumberGenerator();
-      const result = await this.saveUser(code, getOtpDto.mobile, res);
+      const code: number = FunctionUtils.RandomNumberGenerator();
+      const result: IUser | null = await this.saveUser(code, getOtpDto.mobile, res);
       if (!result) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           statusCode: StatusCodes.UNAUTHORIZED,
@@ -77,7 +78,7 @@ export class AuthController {
         excludeExtraneousValues: true,
       });
       const user: IUser | null = await this.authService.register(registerDto);
-      const isUserBan = await BanModel.find({ mobile: user.mobile });
+      const isUserBan: IBanUser[] | null = await BanModel.find({ mobile: user.mobile });
       if (isUserBan.length) {
         return res.status(StatusCodes.FORBIDDEN).json({
           statusCode: StatusCodes.FORBIDDEN,
@@ -117,11 +118,11 @@ export class AuthController {
     }
   }
 
-  async saveUser(code: number, mobile: string, res: any) {
-    const now = new Date().getTime();
+  async saveUser(code: number, mobile: string, res: any): Promise<any> {
+    const now: number = new Date().getTime();
     let expiresIn: number = now + 20000;
     const user: IUser | null = await this.checkExistUser(mobile);
-    const countOfRegisteredUser = await UserModel.count();
+    const countOfRegisteredUser: number = await UserModel.count();
     if (user) {
       if (+user.expiresIn > now) {
         return res.status(StatusCodes.FORBIDDEN).json({
@@ -141,12 +142,12 @@ export class AuthController {
     });
   }
 
-  async checkExistUser(mobile: string) {
+  async checkExistUser(mobile: string): Promise<IUser | null> {
     const user = await UserModel.findOne({ mobile });
     return user;
   }
 
-  async updateUser(mobile: string, objectData: {} = {}) {
+  async updateUser(mobile: string, objectData: {} = {}): Promise<boolean> {
     const updateResult = await UserModel.updateOne({ mobile }, { $set: objectData });
 
     return !!updateResult.modifiedCount;
