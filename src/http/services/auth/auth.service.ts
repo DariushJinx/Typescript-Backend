@@ -55,11 +55,11 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<IUser> {
     errorHandler(loginDto);
     const { username, password } = loginDto;
-    const user = await UserModel.findOne({ username: username });
+    const user: IUser | null = await UserModel.findOne({ username: username });
     if (!user) throw createHttpError.Unauthorized("کاربری با این ایمیل و یا یوزرنیم یافت نشد");
     const isTrueUser: boolean = FunctionUtils.comparePassword(password, user.password);
     if (!isTrueUser) throw createHttpError.Unauthorized("یوزرنیم و یا پسوورد صحیح نمی باشد");
-    const accessToken = FunctionUtils.SignAccessToken({
+    const accessToken: string = FunctionUtils.SignAccessToken({
       mobile: user.mobile,
       username: username,
       id: user._id,
