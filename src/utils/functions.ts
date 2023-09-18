@@ -9,11 +9,13 @@ import createHttpError from "http-errors";
 import { CourseModel } from "../http/models/course/course.model";
 import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { UserModel } from "../http/models/user/user.model";
 
 export class FunctionUtils {
   public static RandomNumberGenerator(): number {
     return ~~(Math.random() * 90000 + 10000);
   }
+
   public static SignAccessToken(payload: JwtToken): string {
     const options = {
       expiresIn: "30d",
@@ -102,5 +104,110 @@ export class FunctionUtils {
     if (String(minutes) == "1") minutes = `0${minutes}`;
     if (String(second) == "1") second = `0${second}`;
     return `${hour} : ${minutes} : ${second}`;
+  }
+
+  public static async getBasketOfUser(userID: string, discount = {}) {
+    const userDetail = await UserModel.aggregate([
+      {
+        $match: { _id: userID },
+      },
+      {
+        $project: { basket: 1 },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "basket.products.productID",
+          foreignField: "_id",
+          as: "productDetail",
+        },
+      },
+      {
+        $lookup: {
+          from: "courses",
+          localField: "basket.courses.courseID",
+          foreignField: "_id",
+          as: "courseDetail",
+        },
+      },
+
+      {
+        $addFields: {
+          productDetail: {
+            $function: {
+              body: function (productDetail: { [key: string]: any }[], products: any) {
+                if (Array.isArray(productDetail)) {
+                  return productDetail.map(function (product) {
+                    const count = products.find(
+                      (item: any) => item.productID.valueOf() == product._id.valueOf()
+                    ).count;
+                    const totalPrice = count * product.price;
+                    return {
+                      ...product,
+                      basketCount: count,
+                      totalPrice,
+                      finalPrice: totalPrice - (product.discount / 100) * totalPrice,
+                    };
+                  });
+                }
+              },
+              args: ["$productDetail", "$basket.products"],
+              lang: "js",
+            },
+          },
+          courseDetail: {
+            $function: {
+              body: function (courseDetail: { [key: string]: any }[]) {
+                return courseDetail.map(function (course) {
+                  return {
+                    ...course,
+                    finalPrice: course.price - (course.discount / 100) * course.price,
+                  };
+                });
+              },
+              args: ["$courseDetail"],
+              lang: "js",
+            },
+          },
+          payDetail: {
+            $function: {
+              body: function (
+                courseDetail: { [key: string]: any }[],
+                productDetail: { [key: string]: any }[],
+                products: any
+              ) {
+                const productAmount = productDetail.reduce(function (total, product) {
+                  const count = products.find(
+                    (item: any) => item.productID.valueOf() == product._id.valueOf()
+                  ).count;
+                  const totalPrice = count * product.price;
+                  return total + (totalPrice - (product.discount / 100) * totalPrice);
+                }, 0);
+
+                const courseAmount = courseDetail.reduce(function (total, course) {
+                  return total + (course.price - (course.discount / 100) * course.price);
+                }, 0);
+
+                const productIds = productDetail.map((product) => product._id.valueOf());
+                const courseIds = courseDetail.map((course) => course._id.valueOf());
+                return {
+                  productAmount,
+                  courseAmount,
+                  paymentAmount: productAmount + courseAmount,
+                  productIds,
+                  courseIds,
+                };
+              },
+              args: ["$courseDetail", "$productDetail", "$basket.products"],
+              lang: "js",
+            },
+          },
+        },
+      },
+      {
+        $project: { basket: 0 },
+      },
+    ]);
+    return FunctionUtils.copyObject(userDetail);
   }
 }
