@@ -9,12 +9,12 @@ export class AuthService {
   async checkOtp(checkOtpDto: CheckOtpDto): Promise<IUser> {
     errorHandler(checkOtpDto);
     const { code, mobile } = checkOtpDto;
-    const user: IUser | null = await UserModel.findOne({ mobile }, { password: 0 });
+    const user: IUser | null = await UserModel.findOne({ mobile: mobile }, { password: 0 });
     if (!user) throw createHttpError.NotFound("کاربر مورد نظر یافت نشد");
     if (user.code != code) throw createHttpError.Unauthorized("کد وارد شده صحیح نمی باشد");
     const now = new Date().getTime();
     if (+user.expiresIn < now) throw createHttpError.Unauthorized("کد وارد شده منقضی شده است");
-    const accessToken = FunctionUtils.SignAccessToken({ mobile, id: user._id });
+    const accessToken = FunctionUtils.SignAccessToken({ mobile: user.mobile, id: user._id });
     user.accessToken = accessToken;
     await user.save();
     return user;
@@ -50,7 +50,7 @@ export class AuthService {
     Reflect.deleteProperty(userObject, "password");
     Reflect.deleteProperty(userObject, "code");
     Reflect.deleteProperty(userObject, "expiresIn");
-    return userObject;
+    return user;
   }
   async login(loginDto: LoginDto): Promise<IUser> {
     errorHandler(loginDto);
