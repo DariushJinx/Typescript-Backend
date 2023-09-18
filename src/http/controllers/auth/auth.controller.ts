@@ -10,6 +10,7 @@ import { errorHandler } from "../../../utils/ApiErrorHandler";
 import { AuthService } from "../../services/auth/auth.service";
 import { BanModel } from "../../models/ban/ban.model";
 import { IBanUser } from "../../types/ban/ban.types";
+import createHttpError from "http-errors";
 @Controller("auth")
 export class AuthController {
   private authService: AuthService = new AuthService();
@@ -58,7 +59,18 @@ export class AuthController {
       const checkOtpDto: CheckOtpDto = plainToClass(CheckOtpDto, req.body, {
         excludeExtraneousValues: true,
       });
-      const user: IUser | null = await this.authService.checkOtp(checkOtpDto);
+
+      errorHandler(checkOtpDto);
+    const { code, mobile } = checkOtpDto;
+    const user: IUser | null = await UserModel.findOne({ mobile: mobile }, { password: 0 });
+    if (!user) throw createHttpError.NotFound("کاربر مورد نظر یافت نشد");
+    if (user.code != code) throw createHttpError.Unauthorized("کد وارد شده صحیح نمی باشد");
+    const now = new Date().getTime();
+    if (+user.expiresIn < now) throw createHttpError.Unauthorized("کد وارد شده منقضی شده است");
+    const accessToken = FunctionUtils.SignAccessToken({ mobile: user.mobile, id: user._id });
+    user.accessToken = accessToken;
+
+      // const user: IUser | null = await this.authService.checkOtp(checkOtpDto);
       res.status(StatusCodes.OK).json({
         statusCode: StatusCodes.OK,
         data: {
@@ -138,7 +150,7 @@ export class AuthController {
       mobile,
       code,
       expiresIn,
-      role: countOfRegisteredUser > 2 ? "USER" : "ADMIN",
+      role: countOfRegisteredUser > 0 ? "USER" : "ADMIN",
     });
   }
 
