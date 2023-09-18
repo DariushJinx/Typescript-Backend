@@ -20,6 +20,12 @@ import { basketController } from "./http/controllers/basket/basket.controller";
 import { BlogController } from "./http/controllers/blog/blog.controller";
 import { CommentController } from "./http/controllers/comment/comment.controller";
 import { ContactController } from "./http/controllers/contact/contact.controller";
+import { InfoController } from "./http/controllers/info/info.controller";
+import { OffController } from "./http/controllers/off/off.controller";
+import { UserController } from "./http/controllers/user/user.controller";
+import { UserProfile } from "./http/controllers/user-profile/user-profile.controller";
+import { PermissionController } from "./http/controllers/RBAC/permission/permission.controller";
+import { RoleController } from "./http/controllers/RBAC/role/role.controller";
 export class setupServer extends Server {
   private server?: http.Server;
   constructor(private port: number = 8888) {
@@ -86,6 +92,12 @@ export class setupServer extends Server {
       new BlogController(),
       new CommentController(),
       new ContactController(),
+      new InfoController(),
+      new OffController(),
+      new UserController(),
+      new UserProfile(),
+      new PermissionController(),
+      new RoleController(),
     ];
     super.addControllers(controllers);
   }
